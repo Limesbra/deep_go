@@ -10,36 +10,70 @@ import (
 // go test -v homework_test.go
 
 type CircularQueue struct {
-	values []int
-	// need to implement
+	values      []int
+	insertIndex int
+	deleteIndex int
 }
 
 func NewCircularQueue(size int) CircularQueue {
-	return CircularQueue{} // need to implement
+	return CircularQueue{
+		values:      make([]int, size),
+		insertIndex: -1,
+		deleteIndex: -1,
+	}
 }
 
 func (q *CircularQueue) Push(value int) bool {
-	return false // need to implement
+	if q.Full() {
+		return false
+	} else {
+		q.insertIndex = (q.insertIndex + 1) % len(q.values)
+		q.values[q.insertIndex] = value
+	}
+	return true
 }
 
 func (q *CircularQueue) Pop() bool {
-	return false // need to implement
+	if q.Empty() {
+		return false
+	} else {
+		q.deleteIndex = (q.deleteIndex + 1) % len(q.values)
+		if q.values[q.deleteIndex] != 0 {
+			q.values[q.deleteIndex] = 0
+		}
+	}
+	return true
 }
 
 func (q *CircularQueue) Front() int {
-	return -1 // need to implement
+	if q.Empty() {
+		return -1
+	}
+	return q.values[(q.deleteIndex+1)%len(q.values)]
 }
 
 func (q *CircularQueue) Back() int {
-	return -1 // need to implement
+	if q.Empty() {
+		return -1
+	}
+	return q.values[q.insertIndex]
 }
 
 func (q *CircularQueue) Empty() bool {
-	return false // need to implement
+	if q.insertIndex == -1 {
+		return true
+	}
+	if q.deleteIndex == q.insertIndex && q.values[q.insertIndex] == 0 {
+		return true
+	}
+	return q.insertIndex == -1
 }
 
 func (q *CircularQueue) Full() bool {
-	return false // need to implement
+	if q.deleteIndex == -1 && q.insertIndex == len(q.values)-1 {
+		return true
+	}
+	return q.deleteIndex == (q.insertIndex+1)%len(q.values) && q.values[q.deleteIndex] != 0
 }
 
 func TestCircularQueue(t *testing.T) {
