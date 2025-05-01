@@ -13,13 +13,15 @@ type CircularQueue struct {
 	values      []int
 	insertIndex int
 	deleteIndex int
+	size        int
 }
 
 func NewCircularQueue(size int) CircularQueue {
 	return CircularQueue{
 		values:      make([]int, size),
-		insertIndex: -1,
-		deleteIndex: -1,
+		insertIndex: 0,
+		deleteIndex: 0,
+		size:        0,
 	}
 }
 
@@ -27,8 +29,13 @@ func (q *CircularQueue) Push(value int) bool {
 	if q.Full() {
 		return false
 	} else {
-		q.insertIndex = (q.insertIndex + 1) % len(q.values)
+		q.size += 1
 		q.values[q.insertIndex] = value
+		if q.insertIndex == len(q.values)-1 {
+			q.insertIndex = 0
+		} else {
+			q.insertIndex += 1
+		}
 	}
 	return true
 }
@@ -37,10 +44,15 @@ func (q *CircularQueue) Pop() bool {
 	if q.Empty() {
 		return false
 	} else {
-		q.deleteIndex = (q.deleteIndex + 1) % len(q.values)
 		if q.values[q.deleteIndex] != 0 {
 			q.values[q.deleteIndex] = 0
 		}
+		if q.deleteIndex == len(q.values)-1 {
+			q.deleteIndex = 0
+		} else {
+			q.deleteIndex += 1
+		}
+		q.size -= 1
 	}
 	return true
 }
@@ -49,31 +61,26 @@ func (q *CircularQueue) Front() int {
 	if q.Empty() {
 		return -1
 	}
-	return q.values[(q.deleteIndex+1)%len(q.values)]
+	return q.values[(q.deleteIndex)%len(q.values)]
 }
 
 func (q *CircularQueue) Back() int {
 	if q.Empty() {
 		return -1
 	}
-	return q.values[q.insertIndex]
+	lastIndex := (q.insertIndex - 1)
+	if lastIndex < 0 {
+		lastIndex = len(q.values) - 1
+	}
+	return q.values[lastIndex]
 }
 
 func (q *CircularQueue) Empty() bool {
-	if q.insertIndex == -1 {
-		return true
-	}
-	if q.deleteIndex == q.insertIndex && q.values[q.insertIndex] == 0 {
-		return true
-	}
-	return q.insertIndex == -1
+	return q.size == 0
 }
 
 func (q *CircularQueue) Full() bool {
-	if q.deleteIndex == -1 && q.insertIndex == len(q.values)-1 {
-		return true
-	}
-	return q.deleteIndex == (q.insertIndex+1)%len(q.values) && q.values[q.deleteIndex] != 0
+	return q.size == len(q.values)
 }
 
 func TestCircularQueue(t *testing.T) {
